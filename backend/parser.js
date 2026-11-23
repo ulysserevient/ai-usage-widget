@@ -119,6 +119,49 @@ export function parseClaudeUsage(output) {
   };
 }
 
+export function parseAgyUsage(output) {
+  const normalized = String(output ?? "").replace(/\r/g, "\n");
+  const fiveHour = findAgySection(normalized, /Five\s+Hour\s+Limit(?:\s+Remaining)?/i);
+  const weekly = findAgySection(normalized, /Weekly\s+Limit(?:\s+Remaining)?/i);
+
+  if (!fiveHour && !weekly) {
+    return null;
+  }
+
+  return {
+    ...(fiveHour ? { primary: fiveHour } : {}),
+    ...(weekly ? { weekly } : {})
+  };
+}
+
+function findAgySection(output, labelPattern) {
+  const sectionRegex = new RegExp(`${labelPattern.source}([\\s\\S]{0,240})`, "i");
+  const sectionMatch = output.match(sectionRegex);
+  if (!sectionMatch) {
+    return null;
+  }
+
+  // Stop before the next quota section so percentages/resets don't bleed across sections.
+  const slice = sectionMatch[1].split(/(?:Five\s+Hour\s+Limit|Weekly\s+Limit|GEMINI\s+MODELS|CLAUDE|Scroll\s*·)/i)[0];
+  const percentMatch = slice.match(/(\d+(?:\.\d+)?)\s*%/);
+  if (!percentMatch) {
+    return null;
+  }
+
+  const value = Number(percentMatch[1]);
+  if (!Number.isFinite(value)) {
+    return null;
+  }
+
+  const resetMatch = slice.match(/Refreshes?\s+in\s+([0-9]+\s*[dhms](?:\s+[0-9]+\s*[dhms])*|[^\n\r]+)/i);
+  const reset = resetMatch ? resetMatch[1].replace(/\s+/g, " ").trim() : "unknown";
+
+  return {
+    percent_left: Math.min(100, Math.max(0, value)),
+    reset
+  };
+}
+
 function findPercent(output, patterns) {
   const value = findNumber(output, patterns);
   if (value === null) {

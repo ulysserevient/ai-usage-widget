@@ -79,3 +79,22 @@ test("builds exhausted provider state from zero percent left", () => {
   assert.equal(result.state, "exhausted");
   assert.equal(result.status, "Gemini quota exhausted");
 });
+
+test("builds ready provider state for agy", () => {
+  const result = readyProvider("agy", {
+    primary: {
+      percent_left: 59.88,
+      reset: "2h 32m"
+    },
+    weekly: {
+      percent_left: 35.27,
+      reset: "137h 41m"
+    }
+  });
+
+  assert.equal(result.provider, "agy");
+  assert.equal(result.available, true);
+  assert.equal(result.state, "ready");
+  assert.equal(result.action, "none");
+  assert.equal(result.status, "Antigravity CLI usage available");
+});

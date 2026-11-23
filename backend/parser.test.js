@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { parseClaudeUsage, parseCodexStatus, parseGeminiUsage } from "./parser.js";
+import { parseAgyUsage, parseClaudeUsage, parseCodexStatus, parseGeminiUsage } from "./parser.js";
 
 test("returns null for gemini tier-only output", () => {
   const output = `
@@ -183,4 +183,38 @@ test("keeps codex 5h and weekly resets independent with long progress bars", () 
   assert.equal(usage.primary.reset, "01:09 on 27 Apr");
   assert.equal(usage.weekly.percent_left, 6);
   assert.equal(usage.weekly.reset, "09:24 on 29 Apr");
+});
+
+test("parses agy /usage panel with weekly and five hour limits", () => {
+  const output = `
+└ Models & Quota
+  Account: user@example.com
+GEMINI MODELS
+  Models within this group: Gemini 4 Neon, Gemini 4 Hydrogen
+  Weekly Limit Remaining
+    [██████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 35.27%
+    Refreshes in 137h 41m
+  Five Hour Limit Remaining
+    [██████████████████████████████░░░░░░░░░░░░░░░░░░░░] 59.88%
+    Refreshes in 2h 32m
+  (1–11 of 38 lines)
+  `;
+  const usage = parseAgyUsage(output);
+
+  assert.equal(usage.primary.percent_left, 59.88);
+  assert.equal(usage.primary.reset, "2h 32m");
+  assert.equal(usage.weekly.percent_left, 35.27);
+  assert.equal(usage.weekly.reset, "137h 41m");
+});
+
+test("parses agy /usage when only five hour limit is present", () => {
+  const usage = parseAgyUsage("Five Hour Limit Remaining [████] 0% Refreshes in 45m");
+
+  assert.equal(usage.primary.percent_left, 0);
+  assert.equal(usage.primary.reset, "45m");
+  assert.equal(usage.weekly, undefined);
+});
+
+test("returns null for unexpected agy output", () => {
+  assert.equal(parseAgyUsage("Antigravity CLI 1.5.15"), null);
 });

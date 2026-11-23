@@ -32,7 +32,8 @@ const AUTH_REQUIRED_PATTERNS = [
   /use\s+\/auth/i,
   /authenticate to continue/i,
   /\/login\s+to\s+activate/i,
-  /use\s+your\s+existing\s+claude\s+max\s+plan/i
+  /use\s+your\s+existing\s+claude\s+max\s+plan/i,
+  /currently\s+not\s+signed\s+in/i
 ];
 
 const MCP_AUTH_REQUIRED_PATTERNS = [
@@ -49,7 +50,8 @@ const SUBSCRIPTION_REQUIRED_PATTERNS = [
 const PROVIDER_LABELS = {
   codex: "Codex CLI",
   claude: "Claude Code CLI",
-  gemini: "Gemini CLI"
+  gemini: "Gemini CLI",
+  agy: "Antigravity CLI"
 };
 
 export function classifyCliFailure(provider, message = "") {

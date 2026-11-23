@@ -43,3 +43,9 @@ test("classifies claude usage subscription requirement separately", () => {
   assert.equal(failure.kind, "subscription_required");
   assert.equal(failure.status, "Claude Code CLI detected; subscription plan required");
 });
+
+test("classifies agy login requirement", () => {
+  const failure = classifyCliFailure("agy", "Welcome to the Antigravity CLI. You are currently not signed in.");
+  assert.equal(failure.kind, "auth_required");
+  assert.equal(failure.status, "Antigravity CLI detected; login required");
+});

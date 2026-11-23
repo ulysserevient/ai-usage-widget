@@ -31,6 +31,7 @@ const STATE_ACTIONS = {
 };
 
 const PROVIDER_LABELS = {
+  agy: "Antigravity CLI",
   claude: "Claude Code CLI",
   codex: "Codex CLI",
   gemini: "Gemini CLI"
