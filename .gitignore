@@ -9,3 +9,5 @@ src-tauri/generated/resources/*
 *.log
 .DS_Store
 config.json
+.env
+secrets.yaml
